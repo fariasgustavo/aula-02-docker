@@ -1,0 +1,57 @@
+version: '3'
+
+services:
+  nodejs:
+    build: ./nodejsserver
+    container_name: 'servernodejs'
+    volumes:
+      - ./nodejsserver:/usr/src/app
+    restart: always
+    ports:
+      - 8000:8000
+    networks:
+      - networkA
+
+  redis:
+    image: redis
+    container_name: redisserver
+    command: redis-server --requirepass Redis123!
+    volumes:
+      - ./redis_data:/data
+    ports:
+      - 6379:6379
+    networks:
+      - networkA
+  
+  postgresdb:
+    container_name: postgresdb
+    image: postgres
+    restart: always
+    environment: 
+      POSTGRES_PASSWORD: 123456
+      POSTGRES_DB: aula-docker
+    volumes:
+      - ./database:/var/lib/postgresql/data
+    ports: 
+      - 5432:5432
+    networks: 
+      - networkA
+      - networkB
+
+  apache:
+    build: ./phpserver
+    container_name: phpserver
+    restart: always
+    ports:
+      - '80:80'
+    volumes:
+      - ./phpserver/php.ini:/usr/local/etc/php/conf.d/php.ini
+      - ./phpserver:/var/www/html
+    networks:
+      - networkB
+
+networks: 
+  networkA:
+    driver: bridge
+  networkB:
+    driver: bridge
